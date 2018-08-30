@@ -1,0 +1,95 @@
+<html>
+
+<link rel="stylesheet" href="vs.css">
+<link rel="stylesheet" href="style/loadcoder.css">
+	
+<script src="highlight.pack.js"></script>
+<script src="loadcoder.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<head >
+<link rel="icon" href="images/polarbear_favicon.png">
+
+  <meta charset="utf-8">
+  <title>Loadcoder</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no">
+  <div>
+
+    <header style="overflow:hidden; background: #0050bb;">
+
+		<span align="top" style="vertical-align: top;" class="table-left">
+			<img src="images/polarbear.png" class="polarbear"/>
+		</span>
+		<span class="table-right">
+		<div class="menu">
+
+			<div class="loadcoder-titel">Loadcoder</div>
+			
+			<div class="submenu">
+					<div class="sublinks" style="padding-left:2em;"><a class="sublink" target="_parent" href="index.html" style="">Start</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="about.html" >About</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="examples.html" >Examples</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="documentation.html" >Documentation</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="clients.html" >Clients</a></div>
+			</div>
+
+
+		</div>
+		</span>
+
+	</header>
+</head>
+	
+<body class="contentbody" style="overflow:hidden;">
+	<div class="frame" align="center">
+	
+		<div class="textareas" >
+			
+			<div class="chapter">
+				REST
+			</div>
+				RestTemplate is the REST client in the Spring framework and commonly used for RESTful communication.
+			
+				<div class="textsplitter" ></div>
+			
+				Create a new RestTemplate like this:
+				<pre><code class="java codearea" >RestTemplate restTemplate = new RestTemplate();</code></pre>
+				
+				Make a GET request and receive the response as a String:
+				<pre><code class="java codearea" >ResponseEntity&lt;String&gt; response = restTemplate.getForEntity("http://localhost:8080", String.class);
+System.out.println(greeting.getBody());
+
+//output:
+{"id":1,"content":"Hello World!"}</code></pre>
+				
+				Deserialization of the response to pojo's is easily done with the jackson dependencies:
+				<pre><code class="java codearea" >ResponseEntity&lt;Greeting&gt; response2 = restTemplate.getForEntity("http://localhost:8080", Greeting.class);
+Greeting pojo = response2.getBody();
+System.out.println(pojo.getContent());
+
+//output:
+Hello World!</code></pre>
+				
+		Of cource it's possible to POST, PUT and use the other HTTP methods, as well as handling HTTP Headers	
+			
+		<pre><code class="java codearea" >HttpEntity&lt;Greeting&gt; entity = new HttpEntity&lt;Greeting&gt;(new Greeting());
+entity.getHeaders().add("Connection", "keep-alive");
+restTemplate.exchange("http://localhost:8080", HttpMethod.POST, entity, Void.class);</code></pre>
+
+				<pre><code class="xml codearea" >&lt;!-- https://mvnrepository.com/artifact/org.springframework/spring-web --&gt;
+&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-web&lt;/artifactId&gt;
+	&lt;version&gt;3.0.2.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl --&gt;
+&lt;dependency&gt;
+	&lt;groupId&gt;org.codehaus.jackson&lt;/groupId&gt;
+	&lt;artifactId&gt;jackson-mapper-asl&lt;/artifactId&gt;
+	&lt;version&gt;1.9.13&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<html>
+
+<link rel="stylesheet" href="vs.css">
+<link rel="stylesheet" href="style/loadcoder.css">
+	
+<script src="highlight.pack.js"></script>
+<script src="loadcoder.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<head >
+<link rel="icon" href="images/polarbear_favicon.png">
+
+  <meta charset="utf-8">
+  <title>Loadcoder</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no">
+  <div>
+
+    <header style="overflow:hidden; background: #0050bb;">
+
+		<span align="top" style="vertical-align: top;" class="table-left">
+			<img src="images/polarbear.png" class="polarbear"/>
+		</span>
+		<span class="table-right">
+		<div class="menu">
+
+			<div class="loadcoder-titel">Loadcoder</div>
+			
+			<div class="submenu">
+					<div class="sublinks" style="padding-left:2em;"><a class="sublink" target="_parent" href="index.html" style="">Start</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="about.html" >About</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="examples.html" >Examples</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="documentation.html" >Documentation</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="clients.html" >Clients</a></div>
+			</div>
+
+
+		</div>
+		</span>
+
+	</header>
+</head>
+	
+<body class="contentbody" style="overflow:hidden;">
+
+	<div class="frame" align="center">
+	
+		<div class="textareas" >
+			<div class="chapter">
+				Welcome to Loadcoder
+			</div>
+			
+			<div class="textsplitter"></div>
+			
+			Loadcoder is a loadtesting tool written and used in Java.<br>
+			It is about collaboration, reusability, simplicity and maintainability. achieved through a common framework and ways of working under your software development.
+			
+			<div align="center">
+			<iframe align="center" style="width:30em; height: 16.9em; max-width:80%" class="pageitem" src="https://www.youtube.com/embed/e-W5W3hg_wI" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+			</div>
+			<br>
+			So if you build your application in Java and want to improve the way performancetesting is done, Loadcoder could be the tool for you.
+			<ul>
+				  <li>Collaboration. Since Loadcoder is nothing more than a simple Java library managed in Maven, every Java coder in your team should be able to understand, use, maintain and develop load tests. Forget the demands of expert knowledge in tool specific scripting syntax and ambitious GUIs to navigate through. If you code Java, either as a developer or as a tester, you're good.</li>
+				  <li style="padding-top: 1em">Reusability: Loadcoder tests can easily be combined with other tools and reuse other parts of your teams production/test code.</li>
+				  <li style="padding-top: 1em">Simplicity: Use your IDE as the load test editor. Take advantage of your teams already high skill in Java</li>
+				  <li style="padding-top: 1em">Maintainability: Store the load tests next to the production code and let the development team maintain them just like their unit tests.</li>
+			</ul>
+		</div>
+	
+		<div class="textareas" >
+			
+			<div class="chapter">
+				Getting started
+			</div>
+				Follow the steps below to get started
+			<ol>
+				<li>
+					Loadcoder is managed with Maven, and the easiest way to getting hold of it is through one of the two dependencies below:
+					<div class="textsplitter" ></div>
+			
+					<ul>
+						<li>
+							loadcoder-all. Contains all functionality and includes some additional external dependencies. Choose this if you are not certain what you need:
+						</li>
+
+						<pre><code class="xml codearea" >&lt;dependency&gt;
+  &lt;groupId&gt;com.loadcoder&lt;/groupId&gt;
+  &lt;artifactId&gt;loadcoder-all&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0-beta3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+						<li>
+							loadcoder-core. Contains only the core functionality. Choose this if you need to restrict the transitive dependencies to a minimum:
+						</li>
+			
+						<pre><code class="xml codearea" >&lt;dependency&gt;
+  &lt;groupId&gt;com.loadcoder&lt;/groupId&gt;
+  &lt;artifactId&gt;loadcoder-core&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0-beta3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+					</ul>
+				</li>
+			</ol>
+		</div>
+	</div>
+</body>
+</html>

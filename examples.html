@@ -1,0 +1,155 @@
+<html>
+
+<link rel="stylesheet" href="vs.css">
+<link rel="stylesheet" href="style/loadcoder.css">
+	
+<script src="highlight.pack.js"></script>
+<script src="loadcoder.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<head >
+<link rel="icon" href="images/polarbear_favicon.png">
+
+  <meta charset="utf-8">
+  <title>Loadcoder</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no">
+  <div>
+
+    <header style="overflow:hidden; background: #0050bb;">
+
+		<span align="top" style="vertical-align: top;" class="table-left">
+			<img src="images/polarbear.png" class="polarbear"/>
+		</span>
+		<span class="table-right">
+		<div class="menu">
+
+			<div class="loadcoder-titel">Loadcoder</div>
+			
+			<div class="submenu">
+					<div class="sublinks" style="padding-left:2em;"><a class="sublink" target="_parent" href="index.html" style="">Start</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="about.html" >About</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="examples.html" >Examples</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="documentation.html" >Documentation</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="clients.html" >Clients</a></div>
+			</div>
+
+
+		</div>
+		</span>
+
+	</header>
+</head>
+	
+<body class="contentbody" style="overflow:hidden;">
+	<div class="frame" align="center">
+	
+		<div align="right" class="textareas textblock">
+			Below you find some examples of how to create and use Loadcoder tests.
+			<div class="textsplitter" ></div>
+		</div>
+
+		<div align="right" class="textareas textblock">
+			<div class="chapter">
+				Preparations
+			</div>
+				The examples are written as unit tests using the @Test (JUnit or TestNG) annotation with only the essential parts included, i e the imports are left out.<br>
+
+				The package com.loadcoder.statics contains all the static imports that the Loadcoder test will need in various situations.
+				Add them to your test class import list:
+			<pre><code class="java codearea" >import static com.loadcoder.statics.Time.*;
+import static com.loadcoder.statics.ThrottleMode.*;
+import static com.loadcoder.statics.StopDesisions.*;
+import static com.loadcoder.statics.LogbackLogging.*;
+import static com.loadcoder.statics.SummaryUtils.*;</code></pre>
+		</div>
+		
+		<div align="right" class="textareas textblock">
+			<div class="chapter">
+				Hello World
+			</div>
+				This is a Loadcoder test in it's simplest form. One thread will run the defined Loadscenario 10 times
+			<pre><code class="java codearea" align="left" >@Test
+public void helloWorldLoadTest() {
+
+  // Implement the LoadScenario to define what the load should consist of
+  LoadScenario loadScenario = new LoadScenario() {
+	
+	public void loadScenario() {
+	  
+	  // Use load method to define a transaction
+	  load("helloWorld", ()->{System.out.println("hello World");}).perform();
+	}
+  };
+
+  Load load = new LoadBuilder(loadScenario)
+
+    //run 10 iterations of the LoadScenario
+    .stopDecision(iterations(10))
+    .build();
+  
+  // Start the test and wait until it finishes
+  new ExecutionBuilder(load).build().execute().andWait();
+}</code></pre>
+		</div>
+
+		<div align="right" class="textareas textblock">
+			<div class="chapter">
+				Extended test
+			</div>
+				This Loadcoder test shows how the transaction can be be handled after it's done, using the handleResult method, as well as showing all the methods in the LoadBuilder. Additionally, a RuntimeChart is created and set in the execution as the runtimeResultUser
+				
+				<pre><code class="java codearea" align="left" >@Test
+public void extendedTest() {
+  
+  ThreadLocal<String> threadLocal = new ThreadLocal<>();
+  LoadScenario ls = new LoadScenario() {
+
+    public void loadScenario() {
+      
+      byte[] response = load("getBytes", () -> "aString".getBytes())
+      .handleResult((resultmodel)->{
+        
+        //the return type for getResponse will be the same as for the transaction
+        byte[] transactionRespone = resultmodel.getResponse();
+        //use it to take decision about status
+        if(transactionRespone.length == 0) {
+          resultmodel.setStatus(false);
+          resultmodel.setMessage("Response was empty");
+        }
+
+        if(resultmodel.getResponseTime() > 100) {
+	          resultmodel.setMessage("This transaction took way too long");
+        }
+      }).perform();
+      
+      // Use the respone from the first transaction in the second
+      load("newString", () -> new String(response)).perform();
+    }
+  };
+  
+  Load load = new LoadBuilder(ls)
+      // 10 threads
+      .amountOfThreads(10) 
+      //each thread will be throttled at a limit of 20 transactions/second
+      .throttle(20, PER_SECOND, PER_THREAD) 
+      //start the 10 threads under 30 seconds
+      .rampup(30 * SECOND)
+      //execute the test under 60 seconds
+      .stopDecision(duration(60 * SECOND))
+      //perform pre and post actions for each of the threads
+      .preExecution(()->{threadLocal.set("Pre execution variable");})
+      .postExecution(()->{threadLocal.get();})
+      .build();
+
+  RuntimeChart chart = new RuntimeChart();	  
+  new ExecutionBuilder(load).runtimeResultUser(chart).build().execute().andWait();
+
+  //wait here until the chart is closed
+  chart.waitUntilClosed();
+}</code></pre>
+		</div>
+
+	</div>
+</body>
+
+</html>

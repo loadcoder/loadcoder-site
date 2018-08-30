@@ -1,0 +1,145 @@
+.frame {
+  height: calc(100% - 3.2em);
+  overflow-x: hidden;
+
+}
+
+.contentbody {
+  	background: #eeeeff;
+	margin:0;	
+	display: block;
+}
+
+/****bar css*****/
+.table-right {
+	display: table-cell;
+	width: 100%;
+}
+
+.table-left {
+	display: table-cell;
+	vertical-align: top;
+}
+
+a.sublink { 
+	color:white;
+	background-color:#0050bb;;
+	font-family:Helvetica;
+	font-size:100%;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+a.sublink:hover { 
+	color:white;
+	background-color:#0066cc;
+	font-family:Helvetica;
+	font-size:100%;
+	font-weight: 700;
+}
+
+.polarbear {
+	padding-top:0.1em;
+	padding-bottom:0.1em;
+	padding-left:0.3em;
+	padding-right:0.2em;
+	height: 3.0em;
+	background: #0066cc;
+	vertical-align: top;
+}
+
+.menu {
+    overflow: auto; 
+	height: auto; 
+	margin:0;
+	width: 100%;
+	display: inline-block;
+}
+.loadcoder-titel {
+	background: #0066cc;
+	font-family:Helvetica; 
+	font-weight: 700; 
+	color:white;
+	font-size:150%;
+	height: 1.0em; /*menu distance from top*/
+	max-width: 100%;
+	padding-top:0.1em; /*titel distance from top*/
+	padding-bottom:0.1em; /*titel distance from top*/
+	padding-left:0em;
+}
+
+.submenu {
+	background: #0050bb;
+	font-family:Helvetica; font-weight: 700; color:white;
+	font-size:100%;
+	height: auto; 
+	padding-bottom: 0.2em;
+}
+
+
+
+.sublinks {
+	display: inline-block; 		
+	padding-right:2em;
+}
+/****************/
+
+.borders {
+    border: 1em solid black;
+}
+
+.widthmiddle {
+
+}
+
+.textsplitter {
+	margin-top: 1.5em;
+}
+
+
+
+.pageitem{
+	margin-top:3.0em;
+	max-width:80%;
+}
+
+.textareas {
+	border-radius: 0.1em em;
+	border: 0em solid #1111ee;
+	background: #f4f4ff;
+    font-size:1.0em;
+	font-family:Helvetica; 
+	text-align: left;
+	max-width: 80%;
+	margin-top:1.0em;
+	padding:1em;
+	box-shadow: 0.5em 0.5em 0.5em grey;
+	margin-bottom: 2em
+}
+
+.bottom {
+	margin-top:30em;
+}
+
+.codearea {
+	text-align: left;
+	border-radius: 0.2em;
+	border: 0.1em solid black;
+	font-size: 10pt;
+	max-width: auto;
+	overflow-x: auto;
+}
+
+.chapter {
+	background: #0066cc;
+	font-family:Helvetica; 
+	font-weight: 700; 
+	color:white;
+	font-size:1.0em;
+	height: 1.2em; 
+	padding-top:0em;
+	padding-left:0em;
+	max-width: 100%;
+	text-align: center;
+	margin-bottom:0.1em;
+}

@@ -1,0 +1,415 @@
+<html>
+
+<link rel="stylesheet" href="vs.css">
+<link rel="stylesheet" href="style/loadcoder.css">
+	
+<script src="highlight.pack.js"></script>
+<script src="loadcoder.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<head >
+<link rel="icon" href="images/polarbear_favicon.png">
+
+  <meta charset="utf-8">
+  <title>Loadcoder</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no">
+  <div>
+
+    <header style="overflow:hidden; background: #0050bb;">
+
+		<span align="top" style="vertical-align: top;" class="table-left">
+			<img src="images/polarbear.png" class="polarbear"/>
+		</span>
+		<span class="table-right">
+		<div class="menu">
+
+			<div class="loadcoder-titel">Loadcoder</div>
+			
+			<div class="submenu">
+					<div class="sublinks" style="padding-left:2em;"><a class="sublink" target="_parent" href="index.html" style="">Start</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="about.html" >About</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="examples.html" >Examples</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="documentation.html" >Documentation</a></div>
+					<div class="sublinks"><a class="sublink" target="_parent" href="clients.html" >Clients</a></div>
+			</div>
+
+
+		</div>
+		</span>
+
+	</header>
+</head>
+	
+<body class="contentbody" style="overflow:hidden;">
+	<div class="frame" align="center">
+
+		<div align="right" class="textareas textblock">
+			<div class="chapter">
+				javadoc
+			</div>
+			You can find the javadocs here:
+			<ul>
+				<li>
+					<a target="search_iframe" href="http://javadoc.io/doc/com.loadcoder/loadcoder-core">http://javadoc.io/doc/com.loadcoder/loadcoder-core</a>
+				</li>
+				<li>
+					<a target="search_iframe" href="http://javadoc.io/doc/com.loadcoder/loadcoder-result">http://javadoc.io/doc/com.loadcoder/loadcoder-result</a>
+				</li>
+				<li>
+					<a target="search_iframe" href="http://javadoc.io/doc/com.loadcoder/loadcoder-logback">http://javadoc.io/doc/com.loadcoder/loadcoder-logback</a>
+				</li>
+				
+			</ul>
+		</div>
+			
+		<div align="right" class="textareas textblock">
+			<div class="chapter">
+				LoadScenario
+			</div>
+			The LoadScenario is the implementation of what the threads that executes the load will be doing. You can specify any logic inside this block that you need in order to achieve the load test that you want. This is where your <a href="#transactions">Transactions<a> are to be defined.
+			<pre><code class="java codearea" align="left" >LoadScenario loadScenario = new LoadScenario() {
+	
+	@Override
+	public void loadScenario() {
+		/* Define in this method what each thread will perform during one iteration */
+	}
+  };</code></pre>
+		</div>
+		
+		<div align="right" class="textareas textblock">
+			<div id="transactions" class="chapter">
+				Transactions
+			</div>
+			Transaction are defined inside the LoadScenario with the load method that takes two parameters.<br>
+			The first parameter is the name of the transaction.<br>
+			The second parameter is the implementation of the transaction. It can be any codeblock that you want to define as a transaction.
+			<pre><code class="java codearea" align="left" >LoadScenario loadScenario = new LoadScenario() {
+	
+	@Override
+	public void loadScenario() {
+		load("nameOfTheTransaction" ()->{/*implementation of the transaction*/}).perform();
+	}
+  };</code></pre>
+			The load method comes in two versions to handle both void and returning transactions
+			
+						<pre><code class="java codearea" align="left" >byte[] bytes = load("returningTransaction", ()->{ return "aString".getBytes();}).perform();
+						
+load("voidTransaction", ()->{ new String(bytes);}).perform();</code></pre>
+  
+			The load method returns a builder object that holds 3 methods of what to do with the transaction.
+			<ol>
+				<li>
+					The perform method performs the transaction and returns the value.
+					<pre><code class="java codearea" align="left" >byte[] bytes = load("returnBytes", ()->{ return "aString".getBytes();}).perform();</code></pre>
+				</li>
+				
+				<li>
+					The handleResult method gives you a possiblity to decide what to do with the result before it is reported as a done transaction. This is done by implementing a ResultHandler that takes one parameter containing all elements of the result, such as response time, returning value and possible thrown Exception. You can also change the values inside the result object which affects how the result are reported.
+					
+					
+					<pre><code class="java codearea" align="left" >load("resultHandled", () -> {return "aString".getBytes();})
+.handleResult((result) -> {
+	if(result.getResponseTime() > 100) {
+		result.setStatus(false);
+		result.setMessage("Really long responsetime");
+	}
+	if(result.getException() != null) {
+		result.setStatus(false);
+	}
+	byte[] returnedBytes = result.getResponse();
+	if(returnedBytes.length == 10) {
+		result.reportTransaction(false);
+	}
+}).perform();</code></pre>
+				</li>
+				<li>
+					The performAndGetModel method returns the same result object that is provided inside the ResultHandler for the handleResult method. This can be used if you for example need the thrown exception later in the LoadScenario.
+					<pre><code class="java codearea" align="left" >public void loadScenario() {
+
+	ResultModel&lt;?&gt; result =
+	load("willThrowException", ()->{ throw new RuntimeException("error");})
+	.performAndGetModel();
+	
+	if(result.getException() != null) {
+		return;
+	}
+	load("nextTransaction", ()->{ }).perform();
+}</code></pre>
+				</li>
+			</ol>
+			<b>Attention!</b> The transaction will not be made if none of the perform methods are called.
+			<pre><code class="java codearea" align="left" >load("unmadeTransaction", ()->{ return "aString".getBytes();});</code></pre>
+		</div>
+		
+		<div align="right" class="textareas textblock">
+			<div class="chapter">
+				LoadBuilder
+			</div>
+			
+			The LoadBuilder takes the LoadScenario as a parameter, and provides a set of methods where the load level and other features like pre and post execution can be set.
+			<pre><code class="java codearea" align="left" >Load load = new LoadBuilder(loadScenario)
+	.amountOfThreads(10)
+	.rampup(30 * SECOND)
+	.stopDecision(duration(2 * MINUTE))
+	.throttle(10, PER_SECOND, PER_THREAD)
+	.preExecution(()->{})
+	.postExecution(()->{})
+	.build();;</code></pre>
+
+		<ul>
+			<li>
+			amountOfThreads sets the amount of threads that shall execute the LoadScenario.
+			</li>
+			<li>
+			rampup sets the rampup duration of the threads
+			</li>
+			<li>
+			stopDecision takes a StopDecision based on the starttime and the amount of done iterations, in order to decide whether to stop the test or not.
+			</li>
+			<li>
+				throttle takes a value and a timeunit to build a throttle for the instensity of the load, with the last parameter stating if the throttle shall be specific per thread or if it should be shared between the threads.
+			</li>
+			<li>
+				The pre and postExecution methods takes a Executable that can be used to setup and teardown the test for each thread. This can be useful if you for example want a unique client for each thread to use for the actual call to the system being tested. In order to achieve this, a mapping is needed between the thread and the setup object. This is easily done with Java's ThreadLocal
+
+				<pre><code class="java codearea" align="left" >ThreadLocal&lt;RestClient&gt; threadLocal = ThreadLocal&lt;RestClient&gt;();
+
+LoadScenario s = new LoadScenario() {
+
+	public void loadScenario() {
+		load("restCall", ()-> {threadLocal.get().callSystem();}).perform();
+	}
+}
+
+Load load = new LoadBuilder(s)
+	.preExecution(()->{threadLocal.set(new RestClient());})
+	.postExecution(()->{threadLocal.get().closeClient();})
+	.build();</code></pre>			
+			</li>
+		</ul>
+	
+			The build method returns a Load instance, which will be used as a parameter to the <a href="#execution">Execution<a> 
+		</div>
+		
+		<div align="right" class="textareas textblock">
+			<div id="execution" class="chapter">
+				Execution
+			</div>
+				An Execution needs to be created in order to run the loadtest. This is done by using the ExecutionBuilder that takes the load as a parameter, as well as providing a set of methods to configure the execution.
+			<pre><code class="java codearea" align="left" >Execution execution = new ExecutionBuilder(load)
+.runtimeResultUser(new RuntimeChart())
+.resultFormatter(SIMPLE_RESULT_FORMATTER)
+.build();</code></pre>
+	
+			<ul>
+				<li>
+					runtimeResultUser takes a RuntimeResultUser which basically can be anything that can consume resultdata during the runtime of the loadtest. <a href="#runtimechart">RuntimeChart<a> is Loadcoder's own implementation that is used to monitor the result during runtime.
+				</li>
+				<li>
+					resultFormatter takes a ResultFormatter that performs the formatting of made transactions into loggable Strings, as well as creating transactions from a previously written logfile. Use this if you want to create your own format for the logfile where the results are written.				
+				</li>
+			</ul>
+
+			The build method returns an Execution instance which can be executed. The return type will be a StartedExecution that can be used to wait until the execution is finished. Once the execution has finished, the andWait method will return a FinishedExecution.
+			<pre><code class="java codearea" align="left" >StartedExecution startedExecution = execution.execute();
+FinishedExecution finished = startedExecution.andWait();</code></pre>
+		</div>
+		
+		
+		<div class="textareas textblock">
+			<div id="runtimechart" class="chapter">
+				RuntimeChart
+			</div>
+	
+			The RuntimeChart is a graph that shows the average response times for each transaction type, as well as throughput and amount of fails over time
+			<img style="max-width: 100%; height: auto; margin-left: auto; display: block; margin-right: auto;" src="images/runtimechart.png"/>
+
+		</div>
+		
+		
+		<div class="textareas textblock">
+			<div id="result" class="chapter">
+				Result
+			</div>
+			 Result can be generated, either from a finished test or a log file from an previously executed test. This Result is used to generate a <a href="#summary">Summary<a> and a <a href="#resultchat">ResultChart<a> with
+				<pre><code class="java codearea" align="left" >Result resultFromExecutedLoad = finished.getReportedResultFromResultFile();
+Result resultFromResultFile = new Result(new File("src/test/resources/testresults/2min.log"));</code></pre>
+		</div>
+		
+		
+		<div class="textareas textblock">
+			<div id="resultchat" class="chapter">
+				ResultChart
+			</div>
+	
+			The ResultChart is similar to the RuntimeChart with additional functionality but can only be used for already finished test.
+	
+			<img style="max-width: 100%; height: auto; margin-left: auto; display: block; margin-right: auto;" src="images/resultchart.png"/>
+
+		</div>
+		
+		
+		<div class="textareas textblock">
+			<div id="summary" class="chapter">
+				Summary
+			</div>
+				A summary can be generated using the Result object. Use the method in SummaryUtils to log the default summary
+				<pre><code class="lc-output codearea" align="left" >SummaryUtils.printSimpleSummary(result, "simleTest");
+				
+==========output==========
+Summary for simleTest
+Duration: 60530 milliseconds
+Throughput: 42.0TPS
+Transaction  MAX  AVG  Fails  90%  
+getId        241  117  0      200  
+change       221  210  0      219  
+delete       321  310  0      319  
+commit       101  70   66     95</code></pre>
+				
+				You can build your own summary customized with the fields and data that you whould like:
+				<pre><code class="lc-output codearea" align="left" >Summary resultSummarizer = new Summary(result);
+resultSummarizer
+	.log((summaryResult)-> {return "Summary for my load test";})
+	.log((summaryResult) -> {return "From resultfile:" + summaryResult.getResultFile();})
+	.table()
+	.column("Transaction", transactionNames())
+	.column("Amount", (transactionList)->{return "" + transactionList.size();})
+	.print();
+				
+==========output==========
+Summary for my load test
+From resultfile:target\myLoadTest\2018-08-14_212828\result.log
+Transaction  Amount  
+getId        114     
+change       114     
+delete       114     
+commit       114 </code></pre>
+				
+		</div>
+		
+		<div class="textareas textblock">
+			<div id="logging" class="chapter">
+				Logging
+			</div>
+	
+			Logging the result works with both Logback and Log4J, but Loadcoder provides the features to change logging directory for Logback, which is because of that the recommended logging library.<br>
+			In order to get the transactions logged, there needs to be a logger defined for the class <b>com.loadcoder.result.Logs</b>
+			
+			<ul>
+				<li>
+					Logback is included in the loadcoder-all dependency. But if you'r just using loadcoder-core you can of cource add Logback explicitly.
+					
+		<pre><code class="xml codearea" align="left" >&lt;!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
+    &lt;artifactId&gt;logback-classic&lt;/artifactId&gt;
+    &lt;version&gt;1.2.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+					Below is an example of the logback.xml. A logger is explicitly created for the class <b>com.loadcoder.result.Logs</b> that uses Loadcoders own SharedDirFileAppenderLogback. This is an extention of the Logback fileappender, but with the ability to switch directory for all the created SharedDirFileAppenderLogback. This is useful if you execute several loadtest and want to keep the logfiles separate between the tests.
+
+					<pre><code class="xml codearea" align="left" >&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;configuration&gt;
+
+	&lt;appender name="resultappender" class="com.loadcoder.logback.SharedDirFileAppenderLogback"&gt;
+		&lt;file&gt;result.log&lt;/file&gt;
+		&lt;append&gt;false&lt;/append&gt;
+		&lt;encoder&gt;
+			&lt;pattern&gt;%m%n&lt;/pattern&gt;
+		&lt;/encoder&gt;
+	&lt;/appender&gt;
+
+	&lt;appender name="infoappender" class="com.loadcoder.logback.SharedDirFileAppenderLogback"&gt;
+		&lt;file&gt;info.log&lt;/file&gt;
+		&lt;append&gt;false&lt;/append&gt;
+		&lt;encoder&gt;
+			&lt;pattern&gt;%date{HH:mm:ss.SSS} %logger{32} %m%n&lt;/pattern&gt;
+		&lt;/encoder&gt;
+	&lt;/appender&gt;
+
+	&lt;logger name="com.loadcoder.result.Logs" level="debug" additivity="false"&gt;
+		&lt;appender-ref ref="resultappender" /&gt;
+	&lt;/logger&gt;
+
+	&lt;root level="info"&gt;
+		&lt;appender-ref ref="infoappender" /&gt;
+	&lt;/root&gt;
+
+&lt;/configuration&gt;</code></pre>
+					
+					Here is an example with 2 tests that each uses the setResultDestination method to set a directory for the files that are written with the SharedDirFileAppenderLogback appenders
+					<pre><code class="java codearea" align="left" >	Logger log = LoggerFactory.getLogger(this.getClass());
+	
+LoadScenario loadScenario = new LoadScenario() {
+	public void loadScenario() {
+		load("foo", ()->{}).perform();
+	}
+};
+
+@Test
+public void test1() {
+	LogbackLogging.setResultDestination(new File("target/logs/test1"));
+	log.info("Executing test 1");
+	Load l = new LoadBuilder(loadScenario).build();
+	new ExecutionBuilder(l).build().execute().andWait();
+}
+
+@Test
+public void test2() {
+	LogbackLogging.setResultDestination(new File("target/logs/test2"));
+	log.info("Executing test 2");
+	Load l = new LoadBuilder(loadScenario).build();
+	new ExecutionBuilder(l).build().execute().andWait();
+}</code></pre>
+				</li>
+				<li>
+					Loadcoder doens't include Log4J so you have to add it if you want to use it. Here is the dependency to slf4j-log4j dependency.
+					
+<pre><code class="xml codearea" align="left" >&lt;!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+    &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
+    &lt;version&gt;1.7.25&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+
+					Below is an example of the log4j.xml. A logger is explicitly created for the class <b>com.loadcoder.result.Logs</b> that uses a FileAppender
+
+					<pre><code class="xml codearea" align="left" >&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;!DOCTYPE log4j:configuration SYSTEM "log4j.dtd"&gt;
+&lt;log4j:configuration debug="true"
+	xmlns:log4j='http://jakarta.apache.org/log4j/'&gt;
+
+	&lt;appender name="console" class="org.apache.log4j.ConsoleAppender"&gt;
+		&lt;layout class="org.apache.log4j.PatternLayout"&gt;
+			&lt;param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" /&gt;
+		&lt;/layout&gt;
+	&lt;/appender&gt;
+
+	&lt;appender name="resultappender" class="org.apache.log4j.FileAppender"&gt;
+		&lt;param name="file" value="target/logs/result.log" /&gt;
+		&lt;layout class="org.apache.log4j.PatternLayout"&gt;
+			&lt;param name="ConversionPattern" value="%m%n" /&gt;
+		&lt;/layout&gt;
+	&lt;/appender&gt;
+	
+	&lt;logger name="com.loadcoder.result.Logs" additivity="false"&gt;
+		&lt;level value="info"/&gt;
+		&lt;appender-ref ref="resultappender"/&gt;
+	&lt;/logger&gt;
+    
+	&lt;root&gt;
+		&lt;level value="info" /&gt;
+		&lt;appender-ref ref="console" /&gt;
+	&lt;/root&gt;
+
+&lt;/log4j:configuration&gt;</code></pre>					
+				</li>
+			</ul>
+
+		</div>
+		
+</div>
+</body>
+
+</html>
